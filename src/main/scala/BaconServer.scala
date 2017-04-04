@@ -7,6 +7,9 @@ import akka.stream.ActorMaterializer
 import scala.io.StdIn
 
 object BaconServer {
+    val host: String = "localhost"
+    val port: Int = 8080
+
     def main(args: Array[String]): Unit = {
         implicit val system = ActorSystem("bacon")
         implicit val materializer = ActorMaterializer()
@@ -22,7 +25,7 @@ object BaconServer {
                     complete(s"hello, $s")
                 }
             }
-        val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
+        val bindingFuture = Http().bindAndHandle(route, host, port)
         println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
         StdIn.readLine()
         bindingFuture
