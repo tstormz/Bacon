@@ -14,7 +14,7 @@ public class Name {
     private Optional<String> suffix = Optional.empty();
 
     public Name(String line) {
-        String namePart = "";
+        String namePart;
         try {
             namePart = line.substring(0, line.indexOf("\t"));
         } catch (StringIndexOutOfBoundsException e) {
@@ -22,8 +22,11 @@ public class Name {
         }
         if (namePart.substring(0, 1).equals("'")) {
             // nicknames are enclosed in single quotes like 'so'
-            nickName = Optional.of(namePart.substring(namePart.substring(1).indexOf("'") + 1));
-            namePart = namePart.substring(nickName.get().length() + 1); // cut out the nickname from the line
+            int indexOfSecondSingleQuote = namePart.substring(1).indexOf("'");
+            if (indexOfSecondSingleQuote > 0) {
+                nickName = Optional.of(namePart.substring(1, indexOfSecondSingleQuote + 1));
+                namePart = namePart.substring(nickName.get().length() + 3); // cut out the nickname from the line
+            }
         }
         int firstNameStartIndex;
         if (namePart.contains(",")) {
