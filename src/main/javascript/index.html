@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns = "http://www.w3.org/1999/xhtml">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="bacon.js"></script>
+        <style>
+            #baconCanvas {
+                background: #eee;
+            }
+            #inputLayer {
+                width: 1200px;
+                height: 720px;
+            }
+            input {
+                border: 2px solid red;
+            }
+        </style>
+        <script>
+            $(document).ready(function() {
+                var bacon = new Bacon("baconCanvas");
+                $("#baconCanvas").click(function(e) {
+                    bacon.createNode(e.pageX, e.pageY);
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <canvas id="baconCanvas" width="1200px" height="720px"></canvas>
+        <div id="inputLayer"></div>
+    </body>
+</html>
