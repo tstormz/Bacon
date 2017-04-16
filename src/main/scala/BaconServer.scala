@@ -1,4 +1,4 @@
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 
@@ -22,4 +22,7 @@ object BaconServer extends App with RestInterface {
     bindingFuture
         .flatMap(_.unbind())
         .onComplete(_ => system.terminate())
+
+    session.close()
+    cluster.close()
 }

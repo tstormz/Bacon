@@ -12,18 +12,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class BaconSeeder extends ActorSeeder {
-    private static final String INSERT_ACTOR = "INSERT INTO actors (name, id, display_name) VALUES (\'%s\', %s, " +
+    public static final String INSERT_ACTOR = "INSERT INTO actors (name, id, display_name) VALUES (\'%s\', %s, " +
             "\'%s\')";
-    private static final String INSERT_ACTOR_WITH_NICKNAME = "INSERT INTO actors (name, id, display_name, nickname)" +
+    public static final String INSERT_ACTOR_WITH_NICKNAME = "INSERT INTO actors (name, id, display_name, nickname)" +
             " VALUES (\'%s\', %s, \'%s\', \'%s\')";
-    private static final String INSERT_ACTOR_WITH_SUFFIX = "INSERT INTO actors (name, id, display_name, suffix) " +
+    public static final String INSERT_ACTOR_WITH_SUFFIX = "INSERT INTO actors (name, id, display_name, suffix) " +
             "VALUES (\'%s\', %s, \'%s\', \'%s\')";
-    private static final String INSERT_ACTOR_WITH_NICKNAME_AND_SUFFIX = "INSERT INTO actors (name, id, " +
+    public static final String INSERT_ACTOR_WITH_NICKNAME_AND_SUFFIX = "INSERT INTO actors (name, id, " +
             "display_name, nickname, suffix) VALUES (\'%s\', %s, \'%s\', \'%s\', \'%s\')";
-    private static final String SELECT_MOVIE = "SELECT * FROM movies WHERE title = \'%s\'";
-    private static final String INSERT_MOVIE_BY_ACTOR = "INSERT INTO movies_by_actors (actor_id, movie_id, " +
+    public static final String SELECT_MOVIE = "SELECT * FROM movies WHERE title = \'%s\'";
+    public static final String INSERT_MOVIE_BY_ACTOR = "INSERT INTO movies_by_actors (actor_id, movie_id, " +
             "movie_title, movie_year) VALUES (%s, %s, \'%s\', \'%s\')";
-    private static final String ADD_CAST_MEMBER = "UPDATE movies SET cast[%s]=\'%s\' WHERE title=\'%s\' AND " +
+    public static final String ADD_CAST_MEMBER = "UPDATE movies SET cast[%s]=\'%s\' WHERE title=\'%s\' AND " +
             "movie_id=%s";
 
     private static SeedLogger logger;

@@ -28,7 +28,7 @@ trait UserResource extends BaconResource {
                     } ~
                     pathPrefix("movies") {
                         post {
-                            entity(as[Movie]) { movie => completeWithLocationHeader(
+                            entity(as[FavoriteMovie]) { movie => completeWithLocationHeader(
                                 resourceId = userService.addMovie(api_key, decode(email), movie),
                                 ifDefinedStatus = 201, ifEmptyStatus = 409)
                             }

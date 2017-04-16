@@ -4,14 +4,14 @@ import Array._
 class UserService(implicit val executionContext: ExecutionContext) {
 
     var users = Vector.empty[User]
-    val movies: java.util.Map[String, Array[Movie]] = new java.util.HashMap
+    val movies: java.util.Map[String, Array[FavoriteMovie]] = new java.util.HashMap
 
     def createUser(api_key: String, user: User): Future[Option[User]] = Future {
         users.find(_.email == user.email) match {
             case Some(u) => None // already exists
             case None =>
                 users = users :+ user
-                movies.put(user.email, Array(Movie("nightmare_on_elm_street", 1984)))
+                movies.put(user.email, Array(FavoriteMovie("nightmare_on_elm_street", 1984)))
                 Some(user)
         }
     }
@@ -45,7 +45,7 @@ class UserService(implicit val executionContext: ExecutionContext) {
         users = users.filterNot(_.email == username)
     }
 
-    def addMovie(api_key: String, username: String, movie: Movie): Future[Option[Movie]] = Future {
+    def addMovie(api_key: String, username: String, movie: FavoriteMovie): Future[Option[FavoriteMovie]] = Future {
         users.find(_.email == username) match {
             case Some(u) =>
                 val userMovies = movies.get(username)
@@ -58,7 +58,7 @@ class UserService(implicit val executionContext: ExecutionContext) {
         }
     }
 
-    def getMovies(api_key: String, username: String): Future[Array[Movie]] = Future {
+    def getMovies(api_key: String, username: String): Future[Array[FavoriteMovie]] = Future {
         movies.get(users.find(_.email == username).get.email)
     }
 
@@ -66,4 +66,4 @@ class UserService(implicit val executionContext: ExecutionContext) {
 
 case class User(email: String, name: String, password: String)
 case class UserUpdate(name: Option[String], password: Option[String])
-case class Movie(title: String, year: Int)
+case class FavoriteMovie(title: String, year: Int)
