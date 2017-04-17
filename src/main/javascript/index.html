@@ -3,6 +3,8 @@
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
         <script src="bacon.js"></script>
+        <script src="actor.js"></script>
+        <script src="movie.js"></script>
         <style>
             #baconCanvas {
                 background: #eee;
@@ -13,6 +15,9 @@
             }
             input {
                 border: 2px solid red;
+            }
+            input:focus {
+                outline: none;
             }
         </style>
         <script>
@@ -27,5 +32,6 @@
     <body>
         <canvas id="baconCanvas" width="1200px" height="720px"></canvas>
         <div id="inputLayer"></div>
+        <p id="debug" style="background:yellow">debug</p>
     </body>
 </html>

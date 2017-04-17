@@ -3,6 +3,7 @@ function Bacon(domObject) {
     var NODE_HEIGHT = 50;
     var PADDING = 20;
     var NODE_COLOR = "#333";
+    var HOST = "http://localhost:8080/v1/";
 
     var previousCoordinate = {x: -1, y: -1};
     var currentCoordinate = {x: -1, y: -1};
@@ -39,29 +40,18 @@ function Bacon(domObject) {
      * Creates a text input for the user to input an actor or movie
      */
     function createInput(type, x, y) {
-        var theNodeId;
         var textField = document.createElement("input");
         textField.type = "text";
         if (type === "actor") {
-            theNodeId = type + actorId
-            textField.id = theNodeId;
-            textField.addEventListener("keyup", function(e) {
-                e.preventDefault();
-                if (e.keyCode == 13) {
-                    var xhttp = new XMLHttpRequest();
-                    xhttp.open("GET", "localhost:8080/v1/users/foo%40bar%2Ecom?api_key=1", false);
-                    xhttp.setRequestHeader("Content-type", "application/json");
-                    xhttp.send();
-                    var response = JSON.parse(xhttp.responseText);
-                    textField.style.border = "2px solid green";
-                    textField.value = responseText;
-                }
-            })
             actorId += 1;
+            var theNodeId = type + actorId
+            textField.id = theNodeId;
+            addActorAction(textField, actorId % 2 == 0);
         } else if (type === "movie") {
+            movieId += 1;
             theNodeId = type + movieId;
             textField.id = theNodeId;
-            movieId += 1;
+            addMovieAction(textField);
         }
         textField.style.position = "absolute";
         textField.style.left = x + "px";
@@ -69,7 +59,7 @@ function Bacon(domObject) {
         textField.style.width = NODE_WIDTH - PADDING * 2 + "px";
         textField.style.zIndex = "1";
         document.getElementById("inputLayer").appendChild(textField);
-        document.getElementById(theNodeId).focus();
+        document.getElementById("actor" + actorId).focus();
     }
 
     /**
@@ -106,6 +96,85 @@ function Bacon(domObject) {
             var length = current - previous;
             return previous + (length >> 1);
         }
+    }
+
+    function addActorAction(textField, oddOrEven) {
+        textField.addEventListener("keyup", function(e) {
+            e.preventDefault();
+            if (e.keyCode == 13) {
+                var url = HOST + "actors/" + format(textField.value);
+                var xhr = createCORSRequest('GET', url);
+                xhr.onload = function() {
+                    if (JSON.parse(xhr.responseText).length != 0) {
+                        if (oddOrEven) {
+                            actor1 = new Actor(xhr.responseText);
+                            actor1.print("debug");
+                        } else {
+                            actor2 = new Actor(xhr.responseText);
+                            actor2.print("debug");
+                        }
+                        textField.style.border = "2px solid green";
+                    } else {
+                        document.getElementById("debug").innerHTML = "error: no actor by that name found";
+                    }
+                };
+                xhr.send();
+                if (movieId > 0) {
+                    document.getElementById("movie" + movieId).focus();
+                }
+            }
+        });
+    }
+
+    function addMovieAction(textField) {
+        textField.addEventListener("keyup", function(e) {
+            e.preventDefault();
+            if (e.keyCode == 13) {
+                var url = HOST + "movies/" + format(textField.value);
+                var xhr = createCORSRequest('GET', url);
+                xhr.onload = function() {
+                    var movieData = JSON.parse(xhr.responseText);
+                    if (movieData.length != 0) {
+                        movie = new Movie(movieData[0]);
+                        movie.print("debug");
+                        if (movie.verifyActors(actor1.id, actor2.id)) {
+                            textField.style.border = "2px solid green";
+                        } else {
+                            alert("Both " + actor1.name + " and " + actor2.name + " must be cast in " + movie.title);
+                        }
+                    }
+                };
+                xhr.send();
+            }
+        });
+    }
+
+    function createCORSRequest(method, url) {
+        var xhr = new XMLHttpRequest();
+        if ("withCredentials" in xhr) {
+            // Check if the XMLHttpRequest object has a "withCredentials" property.
+            // "withCredentials" only exists on XMLHTTPRequest2 objects.
+            xhr.open(method, url, true);
+        } else if (typeof XDomainRequest != "undefined") {
+            // Otherwise, check if XDomainRequest.
+            // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+            xhr = new XDomainRequest();
+            xhr.open(method, url);
+        } else {
+            // Otherwise, CORS is not supported by the browser.
+            xhr = null;
+        }
+        return xhr;
+    }
+
+    function format(str) {
+        var words = str.split(" ");
+        var i = 0;
+        var formatted = "";
+        for (; i < words.length; i++) {
+            formatted += "_" + words[i];
+        }
+        return formatted.substring(1);
     }
 
     /**
