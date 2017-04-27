@@ -1,9 +1,7 @@
 function Movie(movieData) {
 
-    var id, title, year, cast;
-
     this.id = movieData.id;
-    this. title = movieData.title;
+    this.title = movieData.title;
     this.year = movieData.year;
     this.cast = [];
 
@@ -19,7 +17,7 @@ function Movie(movieData) {
             str += "&nbsp;&nbsp;&nbsp;&nbsp;" + this.cast[i] + "<br/>";
         }
         document.getElementById(x).innerHTML = str;
-    }
+    };
 
     this.verifyActors = function(a1, a2) {
         var foundA1, foundA2;
@@ -27,9 +25,9 @@ function Movie(movieData) {
         foundA2 = false;
         var i = 0;
         for (; i < this.cast.length; i++) {
-            if (a1 == this.cast[i]) {
+            if (a1 === this.cast[i]) {
                 foundA1 = true;
-            } else if (a2 == this.cast[i]) {
+            } else if (a2 === this.cast[i]) {
                 foundA2 = true;
             }
             if (foundA1 && foundA2) {
@@ -37,6 +35,6 @@ function Movie(movieData) {
             }
         }
         return false;
-    }
+    };
 
 }

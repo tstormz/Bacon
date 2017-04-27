@@ -3,7 +3,7 @@ function Bacon(domObject) {
     var NODE_HEIGHT = 50;
     var PADDING = 20;
     var NODE_COLOR = "#333";
-    var HOST = "http://localhost:8080/v1/";
+    var HOST = "http://13.58.74.138:8080/v1/";
 
     var previousCoordinate = {x: -1, y: -1};
     var currentCoordinate = {x: -1, y: -1};
@@ -11,30 +11,37 @@ function Bacon(domObject) {
     var actorId = 0;
     var movieId = 0;
 
+    var actor1, actor2;
+
+    var canProceed = true;
+
     /**
      * Draws a new node using the coordinates of a mouse click
      */
     this.createNode = function(x, y) {
-        var midX = x - (NODE_WIDTH >> 1);
-        var midY = y - (NODE_HEIGHT >> 1);
-        var ctx = context();
-        ctx.fillStyle = NODE_COLOR;
-        // draw the node background
-        ctx.fillRect(midX, midY, NODE_WIDTH, NODE_HEIGHT);
-        // create a textfield for the actor
-        createInput("actor", x - (NODE_WIDTH >> 2), y);
-        if (currentCoordinate.x == -1) {
-            currentCoordinate.x = x;
-            currentCoordinate.y = y;
-        } else {
-            saveCoordinates(x, y);
-            connectNodes();
-            // create text field for the movie
-            var movieInputX = findMidPoint(previousCoordinate.x, currentCoordinate.x);
-            var movieInputY = findMidPoint(previousCoordinate.y, currentCoordinate.y);
-            createInput("movie", movieInputX, movieInputY);
+        if (canProceed) {
+            var midX = x - (NODE_WIDTH >> 1);
+            var midY = y - (NODE_HEIGHT >> 1);
+            var ctx = context();
+            ctx.fillStyle = NODE_COLOR;
+            // draw the node background
+            ctx.fillRect(midX, midY, NODE_WIDTH, NODE_HEIGHT);
+            // create a textfield for the actor
+            createInput("actor", x - (NODE_WIDTH >> 2), y);
+            if (currentCoordinate.x === -1) {
+                currentCoordinate.x = x;
+                currentCoordinate.y = y;
+            } else {
+                saveCoordinates(x, y);
+                connectNodes();
+                // create text field for the movie
+                var movieInputX = findMidPoint(previousCoordinate.x, currentCoordinate.x);
+                var movieInputY = findMidPoint(previousCoordinate.y, currentCoordinate.y);
+                createInput("movie", movieInputX, movieInputY);
+                canProceed = false;
+            }
         }
-    }
+    };
 
     /**
      * Creates a text input for the user to input an actor or movie
@@ -44,13 +51,11 @@ function Bacon(domObject) {
         textField.type = "text";
         if (type === "actor") {
             actorId += 1;
-            var theNodeId = type + actorId
-            textField.id = theNodeId;
-            addActorAction(textField, actorId % 2 == 0);
+            textField.id = type + actorId;
+            addActorAction(textField, actorId % 2 === 0);
         } else if (type === "movie") {
             movieId += 1;
-            theNodeId = type + movieId;
-            textField.id = theNodeId;
+            textField.id = type + movieId;
             addMovieAction(textField);
         }
         textField.style.position = "absolute";
@@ -89,11 +94,12 @@ function Bacon(domObject) {
      * movie input
      */
     function findMidPoint(previous, current) {
+        var length;
         if (previous > current) {
-            var length = previous - current;
+            length = previous - current;
             return previous - (length >> 1);
         } else {
-            var length = current - previous;
+            length = current - previous;
             return previous + (length >> 1);
         }
     }
@@ -101,11 +107,11 @@ function Bacon(domObject) {
     function addActorAction(textField, oddOrEven) {
         textField.addEventListener("keyup", function(e) {
             e.preventDefault();
-            if (e.keyCode == 13) {
+            if (e.keyCode === 13) {
                 var url = HOST + "actors/" + format(textField.value);
                 var xhr = createCORSRequest('GET', url);
                 xhr.onload = function() {
-                    if (JSON.parse(xhr.responseText).length != 0) {
+                    if (JSON.parse(xhr.responseText).length !== 0) {
                         if (oddOrEven) {
                             actor1 = new Actor(xhr.responseText);
                             actor1.print("debug");
@@ -129,17 +135,22 @@ function Bacon(domObject) {
     function addMovieAction(textField) {
         textField.addEventListener("keyup", function(e) {
             e.preventDefault();
-            if (e.keyCode == 13) {
+            if (e.keyCode === 13) {
                 var url = HOST + "movies/" + format(textField.value);
                 var xhr = createCORSRequest('GET', url);
                 xhr.onload = function() {
                     var movieData = JSON.parse(xhr.responseText);
-                    if (movieData.length != 0) {
-                        movie = new Movie(movieData[0]);
-                        movie.print("debug");
-                        if (movie.verifyActors(actor1.id, actor2.id)) {
-                            textField.style.border = "2px solid green";
-                        } else {
+                    if (movieData.length !== 0) {
+                        for (var i = 0; i < movieData.length; i++) {
+                            movie = new Movie(movieData[i]);
+                            movie.print("debug");
+                            canProceed = movie.verifyActors(actor1.id, actor2.id);
+                            if (canProceed) {
+                                textField.style.border = "2px solid green";
+                                break;
+                            }
+                        }
+                        if (!canProceed) {
                             alert("Both " + actor1.name + " and " + actor2.name + " must be cast in " + movie.title);
                         }
                     }
@@ -155,7 +166,7 @@ function Bacon(domObject) {
             // Check if the XMLHttpRequest object has a "withCredentials" property.
             // "withCredentials" only exists on XMLHTTPRequest2 objects.
             xhr.open(method, url, true);
-        } else if (typeof XDomainRequest != "undefined") {
+        } else if (typeof XDomainRequest !== "undefined") {
             // Otherwise, check if XDomainRequest.
             // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
             xhr = new XDomainRequest();

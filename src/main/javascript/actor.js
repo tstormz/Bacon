@@ -3,16 +3,21 @@ function Actor(data) {
     var name, nickname, suffix, id, filmography;
 
     var dataParser = JSON.parse(data);
+    var actorIndex = 0;
 
-    this.name = dataParser[0].name;
-    this.nickname = dataParser[0].nickname;
-    this.suffix = dataParser[0].suffix;
-    this.id = dataParser[0].id;
+    if (dataParser.length > 1) {
+        actorIndex = findActorWithMostTitles(dataParser);
+    }
+
+    this.name = dataParser[actorIndex].name;
+    this.nickname = dataParser[actorIndex].nickname;
+    this.suffix = dataParser[actorIndex].suffix;
+    this.id = dataParser[actorIndex].id;
 
     this.filmography = [];
 
     var i;
-    var movies = dataParser[0].filmography;
+    var movies = dataParser[actorIndex].filmography;
     for (i = 0; i < movies.length; i++) {
         this.filmography.push(new MovieWrapper(movies[i].id, movies[i].title, movies[i].year));
     }
@@ -27,12 +32,27 @@ function Actor(data) {
         document.getElementById(x).innerHTML = str;
     }
 
-    function MovieWrapper(id, title, year) {
-        var id, title, year;
-
-        this.id = id;
-        this. title = title;
-        this.year = year;
+    function findActorWithMostTitles(parser) {
+        var i = 0;
+        var max = 0;
+        var indexOfMax = -1;
+        for (; i < parser.length; i++) {
+            var numberOfTitles = parser[i].filmography.length;
+            // if actor at index i has the most films
+            if (numberOfTitles > max) {
+                // set max and remember the index of the actor
+                max = numberOfTitles;
+                indexOfMax = i;
+            }
+        }
+        return indexOfMax;
     }
 
+    function MovieWrapper(id, title, year) {
+        var id, title, year
+
+        this.id = id;
+        this.title = title;
+        this.year = year;
+    }
 }
