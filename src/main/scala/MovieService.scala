@@ -10,12 +10,12 @@ import ExecutionContext.Implicits.global
 case class Movie(title: String, year: String, cast: List[CastMember])
 case class CastMember(id: String, name: String)
 
-class MovieService(val session: Session, val executionContext: ExecutionContext) {
+class MovieService(val movies: Session, val executionContext: ExecutionContext) {
 
     def findMovie(title: String): Future[List[Movie]] = Future {
         val query = String.format(BaconSeeder.SELECT_MOVIE, title.replaceAll("'", "''"))
         var movieMatches = List[Movie]()
-        val results: ResultSet = session.execute(query)
+        val results: ResultSet = movies.execute(query)
         for (row: Row <- results.all()) {
             val cast: java.util.Map[UUID, String] = row.getMap("cast", classOf[UUID], classOf[String])
             var castMembers: List[CastMember] = List[CastMember]()

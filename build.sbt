@@ -14,6 +14,7 @@ libraryDependencies += "com.typesafe.akka" % "akka-actor_2.11" % "2.4.7"
 libraryDependencies += "com.typesafe.akka" %% "akka-http-core" % "2.4.7"
 libraryDependencies += "com.typesafe.akka" %% "akka-http-experimental" % "2.4.7"
 libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.4.7"
+libraryDependencies += "ch.megard" %% "akka-http-cors" % "0.1.2"
 
 // JSON
 libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.11"

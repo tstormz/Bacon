@@ -23,6 +23,8 @@ object BaconServer extends App with RestInterface {
         .flatMap(_.unbind())
         .onComplete(_ => system.terminate())
 
-    session.close()
-    cluster.close()
+    imdbData.close()
+    movieDatabase.close()
+    users.close()
+    userCluster.close()
 }
