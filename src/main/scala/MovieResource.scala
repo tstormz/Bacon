@@ -1,19 +1,33 @@
-import akka.http.scaladsl.model.headers.HttpOriginRange
-import akka.http.scaladsl.server.Route
-import ch.megard.akka.http.cors.{CorsDirectives, CorsSettings}
-import ch.megard.akka.http.cors.CorsDirectives._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.headers.{HttpOrigin, HttpOriginRange}
+import akka.http.scaladsl.server.{ExceptionHandler, RejectionHandler, Route}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 
 trait MovieResource extends BaconResource {
     val movieService: MovieService
 
-    var settings = CorsSettings.defaultSettings.copy(allowGenericHttpRequests = true, allowCredentials = false, allowedOrigins = HttpOriginRange.*)
-
     def movieRoutes: Route = pathPrefix("v1") {
-        handleRejections(CorsDirectives.corsRejectionHandler) {
-            cors(settings) {
-                pathPrefix("movies") {
-                    path(Segment) { title =>
-                        complete(movieService.findMovie(title))
+
+        val corsSettings = CorsSettings.defaultSettings.copy(
+            allowedOrigins = HttpOriginRange(HttpOrigin("http://cs.oswego.edu"))
+        )
+
+        val rejectionHandler = corsRejectionHandler withFallback RejectionHandler.default
+
+        val exceptionHandler = ExceptionHandler {
+            case e: NoSuchElementException => complete(StatusCodes.NotFound -> e.getMessage)
+        }
+
+        val handleErrors = handleRejections(rejectionHandler) & handleExceptions(exceptionHandler)
+
+        handleErrors {
+            cors(corsSettings) {
+                handleErrors {
+                    pathPrefix("movies") {
+                        path(Segment) { title =>
+                            complete(movieService.findMovie(title))
+                        }
                     }
                 }
             }

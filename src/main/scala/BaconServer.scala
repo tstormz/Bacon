@@ -25,6 +25,5 @@ object BaconServer extends App with RestInterface {
 
     imdbData.close()
     movieDatabase.close()
-    users.close()
     userCluster.close()
 }
