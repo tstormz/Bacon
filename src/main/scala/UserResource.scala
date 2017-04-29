@@ -1,13 +1,15 @@
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.headers.{HttpOriginRange, HttpOrigin}
-import akka.http.scaladsl.server.{ExceptionHandler, Directives, Route, RejectionHandler}
-import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
+import akka.http.scaladsl.model.headers.{HttpOrigin, HttpOriginRange}
+import akka.http.scaladsl.server.{ExceptionHandler, RejectionHandler, Route}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
 
 trait UserResource extends BaconResource {
     val userService: UserService
+    val movieService: MovieService
+    val actorService: ActorService
 
-    def userRoutes: Route = {
+    def bacon: Route = {
 
         val corsSettings = CorsSettings.defaultSettings.copy(
             allowedOrigins = HttpOriginRange(HttpOrigin("http://cs.oswego.edu"))
@@ -54,6 +56,14 @@ trait UserResource extends BaconResource {
                                         }
                                     }
                                 }
+                            }
+                        } ~ pathPrefix("movies") {
+                            path(Segment) { title =>
+                                complete(movieService.findMovie(title))
+                            }
+                        } ~ pathPrefix("actors") {
+                            path(Segment) { name =>
+                                complete(actorService.findActor(name))
                             }
                         }
                     }

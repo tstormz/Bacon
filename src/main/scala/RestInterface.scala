@@ -22,6 +22,6 @@ trait RestInterface extends Resources {
     lazy val movieService = new MovieService(imdbData, executionContext)
     lazy val actorService = new ActorService(imdbData, executionContext)
 
-    val routes: Route = userRoutes ~ movieRoutes ~ actorRoutes
+    val routes: Route = bacon
 
 }
