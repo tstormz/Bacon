@@ -7,7 +7,7 @@ import collection.JavaConversions._
 import scala.concurrent._
 import ExecutionContext.Implicits.global
 
-case class Movie(title: String, year: String, cast: List[CastMember])
+case class Movie(id: String, title: String, year: String, cast: List[CastMember])
 case class CastMember(id: String, name: String)
 
 class MovieService(val movies: Session, val executionContext: ExecutionContext) {
@@ -22,7 +22,7 @@ class MovieService(val movies: Session, val executionContext: ExecutionContext) 
             for (id <- cast.keySet()) {
                 castMembers ::= new CastMember(id.toString, cast.get(id))
             }
-            movieMatches ::= new Movie(row.getString("title"), row.getString("year"), castMembers)
+            movieMatches ::= new Movie(row.getUUID("movie_id").toString, row.getString("title"), row.getString("year"), castMembers)
         }
         movieMatches
     }

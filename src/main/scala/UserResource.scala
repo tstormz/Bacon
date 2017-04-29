@@ -12,7 +12,8 @@ trait UserResource extends BaconResource {
     def bacon: Route = {
 
         val corsSettings = CorsSettings.defaultSettings.copy(
-            allowedOrigins = HttpOriginRange(HttpOrigin("http://cs.oswego.edu"))
+            allowedOrigins = HttpOriginRange.*,
+            allowCredentials = false
         )
 
         val rejectionHandler = corsRejectionHandler withFallback RejectionHandler.default

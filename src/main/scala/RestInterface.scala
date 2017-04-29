@@ -4,8 +4,6 @@ import com.datastax.driver.core.{Session, Cluster}
 import scala.concurrent.ExecutionContext
 
 trait Resources extends UserResource
-    with MovieResource
-    with ActorResource
 
 trait RestInterface extends Resources {
 
