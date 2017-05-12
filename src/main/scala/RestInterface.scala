@@ -10,7 +10,7 @@ trait RestInterface extends Resources {
     implicit def executionContext: ExecutionContext
 
     val movieDatabase: Cluster = Cluster.builder().addContactPoint("52.14.185.37").build()
-    val userCluster: Cluster = Cluster.builder().addContactPoint("13.58.72.18").build()
+    val userCluster: Cluster = Cluster.builder().addContactPoint("13.58.103.190").build()
     movieDatabase.init()
     userCluster.init()
     val imdbData: Session = movieDatabase.connect("gameplay")

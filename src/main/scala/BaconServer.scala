@@ -5,7 +5,7 @@ import akka.stream.ActorMaterializer
 import scala.io.StdIn
 
 object BaconServer extends App with RestInterface {
-    val host: String = "localhost"
+    val host: String = "172.31.32.117"
     val port: Int = 8080
 
     implicit val system = ActorSystem("bacon")

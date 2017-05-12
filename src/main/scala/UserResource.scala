@@ -1,4 +1,6 @@
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{HttpMethod, StatusCodes}
+import akka.http.scaladsl.model.HttpMethods._
+import scala.collection.immutable
 import akka.http.scaladsl.model.headers.{HttpOrigin, HttpOriginRange}
 import akka.http.scaladsl.server.{ExceptionHandler, RejectionHandler, Route}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
@@ -13,7 +15,8 @@ trait UserResource extends BaconResource {
 
         val corsSettings = CorsSettings.defaultSettings.copy(
             allowedOrigins = HttpOriginRange.*,
-            allowCredentials = false
+            allowCredentials = false,
+            allowedMethods = immutable.Seq(GET,PUT,POST,HEAD,OPTIONS)
         )
 
         val rejectionHandler = corsRejectionHandler withFallback RejectionHandler.default
@@ -52,8 +55,14 @@ trait UserResource extends BaconResource {
                                                 resourceId = userService.addMovie(api_key, decode(email), movie),
                                                 ifDefinedStatus = 201, ifEmptyStatus = 409)
                                             }
-                                        } ~ get {
-                                            complete(userService.getMovies(api_key, decode(email)))
+                                        } ~ pathEnd {
+                                            get {
+                                                complete(userService.getMovies(api_key, decode(email)))
+                                            }
+                                        } ~ pathPrefix("recommendations") {
+                                            get {
+                                                complete(userService.recommend(api_key, decode(email)))
+                                            }
                                         }
                                     }
                                 }
