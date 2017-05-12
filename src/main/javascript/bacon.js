@@ -142,11 +142,12 @@ function Bacon(domObject) {
                     var movieData = JSON.parse(xhr.responseText);
                     if (movieData.length !== 0) {
                         for (var i = 0; i < movieData.length; i++) {
-                            movie = new Movie(movieData[i]);
+                            var movie = new Movie(movieData[i]);
                             movie.print("debug");
                             canProceed = movie.verifyActors(actor1.id, actor2.id);
                             if (canProceed) {
                                 textField.style.border = "2px solid green";
+                                addMovie(movie.id, movie.title);
                                 break;
                             }
                         }
@@ -159,6 +160,38 @@ function Bacon(domObject) {
             }
         });
     }
+
+    function addMovie(movie_id, title) {
+        var postMovie = createCORSRequest('POST', HOST + "users/foo%40bar%2Ecom/movies?api_key=0");
+        postMovie.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        var mydata = JSON.stringify({
+            id: movie_id,
+            title: title,
+            displayName: displayName(title)
+        });
+        document.getElementById("jsondebug").innerHTML = mydata;
+        $.ajax({
+            url: HOST + "users/foo%40bar%2Ecom/movies?api_key=0",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            type: "POST",
+            dataType: "json",
+            data: mydata
+        });
+    }
+
+    function displayName(title) {
+        var formattedName = "";
+        var words = title.split("_");
+        for (var i = 0; i < words.length; i++) {
+            var firstLetter = words[i].substring(0, 1).toUpperCase();
+            formattedName += " " + firstLetter + words[i].substring(1);
+        }
+        return formattedName.substring(1);
+    }
+
 
     function createCORSRequest(method, url) {
         var xhr = new XMLHttpRequest();

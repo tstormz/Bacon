@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Movie or Actor</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        var HOST = "http://13.58.74.138:8080/v1/";
+
+        function getEmail() {
+            var url = window.location.href;
+            var name = "email";
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        function createCORSRequest(method, url) {
+            var xhr = new XMLHttpRequest();
+            if ("withCredentials" in xhr) {
+                // Check if the XMLHttpRequest object has a "withCredentials" property.
+                // "withCredentials" only exists on XMLHTTPRequest2 objects.
+                xhr.open(method, url, true);
+            } else if (typeof XDomainRequest !== "undefined") {
+                // Otherwise, check if XDomainRequest.
+                // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+                xhr = new XDomainRequest();
+                xhr.open(method, url);
+            } else {
+                // Otherwise, CORS is not supported by the browser.
+                xhr = null;
+            }
+            return xhr;
+        }
+
+        function format(str) {
+            var words = str.split(" ");
+            var i = 0;
+            var formatted = "";
+            for (; i < words.length; i++) {
+                formatted += "_" + words[i];
+            }
+            return formatted.substring(1);
+        }
+
+        function displayName(title) {
+            var formattedName = "";
+            var words = title.split("_");
+            for (var i = 0; i < words.length; i++) {
+                var firstLetter = words[i].substring(0, 1).toUpperCase();
+                formattedName += " " + firstLetter + words[i].substring(1);
+            }
+            return formattedName.substring(1);
+        }
+
+        function addLink(movie) {
+            var link = document.createElement("a");
+            link.href = "#";
+            link.onclick = function() {
+                addMovie(movie.id, movie.title);
+                document.getElementById("movieConflicts").innerHTML = "";
+            };
+            link.appendChild(document.createTextNode(displayName(movie.title) + " (" + movie.year + ")"));
+            var item = document.createElement("li");
+            item.appendChild(link);
+            document.getElementById("movieConflicts").appendChild(item);
+        }
+
+        function addMovie(movie_id, title) {
+            var xhr = createCORSRequest('POST', HOST + "users/" + getEmail() + "/movies?api_key=0");
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.send(
+                JSON.stringify({
+                    id: movie_id,
+                    title: title,
+                    displayName: displayName(title),
+                    userRating: 1
+                })
+            );
+        }
+
+        $(document).ready(function() {
+            var movieField = document.createElement("input");
+            movieField.type = "text";
+            movieField.id = "movieField";
+            movieField.addEventListener("keyup", function(e) {
+                e.preventDefault();
+                if (e.keyCode === 13) {
+                    var xhr = createCORSRequest('GET', HOST + "movies/" + format(document.getElementById("movieField").value));
+                    xhr.onload = function() {
+                        var movieData = JSON.parse(xhr.responseText);
+                        if (movieData.length !== 0) {
+                            for (var i = 0; i < movieData.length; i++) {
+                                addLink(movieData[i]);
+                            }
+                        }
+                        movieField.value = "";
+                    };
+                    xhr.send();
+                }
+            });
+            document.getElementById("addMovie").appendChild(movieField);
+        });
+    </script>
+</head>
+<body>
+    <h1>Admin Panel</h1>
+    <h3>Add Movie</h3>
+    <div id="addMovie"></div>
+    <ul id="movieConflicts"></ul>
+</body>
+</html>

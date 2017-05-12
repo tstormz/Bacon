@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script>
+        var HOST = "http://13.58.74.138:8080/v1/";
+
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        function encodeEmail(email) {
+            return email.replace("@", "%40").replace(".", "%2E");
+        }
+
+        function displayName(title) {
+            var formattedName = "";
+            var words = title.split("_");
+            for (var i = 0; i < words.length; i++) {
+                var firstLetter = words[i].substring(0, 1).toUpperCase();
+                formattedName += " " + firstLetter + words[i].substring(1);
+            }
+            return formattedName.substring(1);
+        }
+
+        function createCORSRequest(method, url) {
+            var xhr = new XMLHttpRequest();
+            if ("withCredentials" in xhr) {
+                // Check if the XMLHttpRequest object has a "withCredentials" property.
+                // "withCredentials" only exists on XMLHTTPRequest2 objects.
+                xhr.open(method, url, true);
+            } else if (typeof XDomainRequest !== "undefined") {
+                // Otherwise, check if XDomainRequest.
+                // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+                xhr = new XDomainRequest();
+                xhr.open(method, url);
+            } else {
+                // Otherwise, CORS is not supported by the browser.
+                xhr = null;
+            }
+            return xhr;
+        }
+
+        function updateLike(link, newRating) {
+            link.innerHTML = newRating === 1 ? "like" : "dislike";
+        }
+
+        function createLikeLink(rating) {
+            var link = document.createElement("a");
+            link.href = "#";
+            link.append(document.createTextNode(rating === 1 ? "like" : "dislike"));
+            link.onclick = function() {
+                updateLike(link, rating === 1 ? 0 : 1);
+            };
+            var like = document.createElement("td");
+            like.append(link);
+            return like;
+        }
+
+        function addRow(movie) {
+            var row = document.createElement("tr");
+            var id = document.createElement("td");
+            id.append(document.createTextNode(movie.id));
+            var title = document.createElement("td");
+            title.append(document.createTextNode(displayName(movie.title)));
+            var like = createLikeLink(movie.userRating);
+            row.append(id);
+            row.append(title);
+            row.append(like);
+            document.getElementById("movies").appendChild(row);
+        }
+
+        $(document).ready(function() {
+            var username = getParameterByName("email");
+            var url = HOST + "users/" + encodeEmail(username) + "/movies?api_key=0";
+            var getMovies = createCORSRequest("GET", url);
+            getMovies.onload = function() {
+                var movies = JSON.parse(getMovies.responseText);
+                for (var i = 0; i < movies.length; i++) {
+                    addRow(movies[i]);
+                }
+            };
+            getMovies.send();
+        });
+    </script>
+</head>
+<body>
+    <h1>User Profile</h1>
+    <h3>Favorite Movies</h3>
+    <table>
+        <tbody id="movies">
+            <tr>
+                <th>id</th>
+                <th>title</th>
+                <th>like/dislike</th>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
