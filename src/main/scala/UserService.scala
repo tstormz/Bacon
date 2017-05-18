@@ -7,10 +7,50 @@ import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+  * Representation of the User, used to create new users
+  *
+  * @param email The user's email (which is also the username)
+  * @param name The user's name
+  * @param password The user's password
+  */
 case class User(email: String, name: String, password: String)
+
+/**
+  * Possible properties of the user that can be updated
+  *
+  * @param name The new name
+  * @param password The new password
+  */
 case class UserUpdate(name: Option[String], password: Option[String])
+
+/**
+  * Representation of a Movie that the user has used during the game
+  *
+  * @param id The movie's ID in the database
+  * @param title The title of the movie
+  * @param displayName The title of the movie in a displayable format
+  * @param userRating Like or Dislike (1 and 0 respectively)
+  */
 case class FavoriteMovie(id: String, title: String, displayName: String, userRating: Int)
+
+/**
+  * A potential movie recommendation (used to indicate the movie hasn't been seen by
+  * a particular user)
+  *
+  * @param id The movie's ID in the database
+  * @param title The title of the movie
+  * @param recommendation The recommendation score
+  */
 case class RecommendedMovie(id: String, title: String, recommendation: Double)
+
+/**
+  * Represenation of a suggested movie (basically a {@link RecommendedMovie} with a
+  * high recommendation score
+  *
+  * @param id The movie's ID in the database
+  * @param title The title of the movie
+  */
 case class SuggestedMovie(id: UUID, title: String)
 
 class UserService(users: Session, executionContext: ExecutionContext) {
@@ -25,6 +65,14 @@ class UserService(users: Session, executionContext: ExecutionContext) {
     // TODO remove this constant
     val API_KEY = "0"
 
+    /**
+      * Given a proper User representation, inserts the user into the database in the
+      * users table (user keyspace)
+      *
+      * @param api_key The developers API key
+      * @param user Represenatation of the user
+      * @return A Future containing the new User
+      */
     def createUser(api_key: String, user: User): Future[Option[User]] = Future {
         val cleanEmail = user.email.replaceAll("'", "''")
         val cleanName = user.name.replaceAll("'", "''")
@@ -32,12 +80,25 @@ class UserService(users: Session, executionContext: ExecutionContext) {
         Some(user)
     }
 
+    /**
+      * Locates a user in the database given a proper username
+      *
+      * @param username The username (email) of the user to find
+      * @return A Future containing the representation of the found User
+      */
     def getUser(username: String): Future[Option[User]] = Future {
         val results: ResultSet = users.execute(FIND_USER.format(API_KEY, username.replaceAll("'", "''")))
         val row: Row = results.one(); // there should only be one because of the clustering column
         Option(User(row.getString("email"), row.getString("name"), row.getString("password")))
     }
 
+    /**
+      * Updates a User's information in the database
+      *
+      * @param username The User's username (email)
+      * @param update A UserUpdate wrapper containing the new updated fields
+      * @return The UserUpdate
+      */
     def updateUser(username: String, update: UserUpdate): Future[Option[UserUpdate]] = {
         getUser(username).flatMap {
             case None => Future {
@@ -57,6 +118,12 @@ class UserService(users: Session, executionContext: ExecutionContext) {
         }
     }
 
+    /**
+      * Deletes a user from the database
+      *
+      * @param username The username (email) of the user to delete
+      * @return
+      */
     def deleteUser(username: String): Future[Unit] = Future {
         users.execute(DELETE.format(API_KEY, username.replaceAll("'", "''")))
     }
